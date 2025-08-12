@@ -2,6 +2,11 @@ import os
 import time
 import requests
 
+from utils import get_audio_duration, estimate_cost
+import os
+import time
+import requests
+
 def detect_language(audio_file_path):
     start = time.time()
     try:
@@ -17,9 +22,9 @@ def detect_language(audio_file_path):
             response = requests.post(url, headers=headers, files=files)
             response.raise_for_status()
             result = response.json()
-            # Try to extract language from the response
             detected_language = result.get("language", result.get("language_code", "unknown"))
-            cost = 0.01  # Placeholder for cost, update if pricing is known
+            duration_sec = get_audio_duration(audio_file_path)
+            cost = estimate_cost("Sarvam AI", duration_sec)
             status = "success"
             error = None
     except Exception as e:

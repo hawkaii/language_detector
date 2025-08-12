@@ -1,12 +1,28 @@
 import time
 
+from utils import get_audio_duration, estimate_cost
+import time
+import os
+import openai
+
 def detect_language(audio_file_path):
     start = time.time()
     try:
-        # TODO: Replace with real OpenAI API call
-        # Simulate detection
-        detected_language = "en"
-        cost = 0.01  # Placeholder
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is not set")
+        openai.api_key = api_key
+        with open(audio_file_path, "rb") as audio_file:
+            response = openai.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio_file,
+                response_format="json",
+                language=None,  # Let Whisper auto-detect
+                timestamp_granularities=["segment"]
+            )
+        detected_language = response.get("language", "unknown")
+        duration_sec = get_audio_duration(audio_file_path)
+        cost = estimate_cost("OpenAI", duration_sec)
         status = "success"
         error = None
     except Exception as e:
@@ -23,3 +39,4 @@ def detect_language(audio_file_path):
         "status": status,
         "error": error
     }
+

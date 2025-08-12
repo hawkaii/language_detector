@@ -2,6 +2,11 @@ import os
 import time
 import requests
 
+from utils import get_audio_duration, estimate_cost
+import os
+import time
+import requests
+
 def detect_language(audio_file_path):
     start = time.time()
     
@@ -30,10 +35,8 @@ def detect_language(audio_file_path):
             
             result = response.json()
             detected_language = result.get("language_code", "unknown")
-            
-            # ElevenLabs pricing: approximately $0.03 per minute
-            # Rough estimate based on audio file size
-            cost = 0.01  # Placeholder cost estimate
+            duration_sec = get_audio_duration(audio_file_path)
+            cost = estimate_cost("ElevenLabs", duration_sec)
             
             status = "success"
             error = None
@@ -53,3 +56,4 @@ def detect_language(audio_file_path):
         "status": status,
         "error": error
     }
+

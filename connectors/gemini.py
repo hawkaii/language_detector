@@ -9,6 +9,17 @@ load_dotenv()
 # You must set GEMINI_API_KEY in your .env file
 API_KEY = os.getenv("GEMINI_API_KEY")
 
+from utils import get_audio_duration, estimate_cost
+import time
+import os
+import google.generativeai as genai
+from google.generativeai.protos import Blob
+from dotenv import load_dotenv
+
+load_dotenv()
+
+API_KEY = os.getenv("GEMINI_API_KEY")
+
 def detect_language(audio_file_path):
     start = time.time()
     try:
@@ -19,14 +30,14 @@ def detect_language(audio_file_path):
         with open(audio_file_path, "rb") as f:
             audio_data = f.read()
         prompt = "What is the spoken language in this audio? Respond with only the language code (e.g., en, hi, ta, etc)."
-        # Create a proper Blob object for audio data
         audio_blob = Blob(mime_type="audio/wav", data=audio_data)
         response = model.generate_content([
             prompt,
             audio_blob
         ])
-        detected_language = response.text.strip().split()[0]  # crude extraction
-        cost = 0.01  # Placeholder, update with real cost if available
+        detected_language = response.text.strip().split()[0]
+        duration_sec = get_audio_duration(audio_file_path)
+        cost = estimate_cost("Google Gemini", duration_sec)
         status = "success"
         error = None
     except Exception as e:
@@ -43,3 +54,4 @@ def detect_language(audio_file_path):
         "status": status,
         "error": error
     }
+
